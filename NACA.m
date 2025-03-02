@@ -18,7 +18,7 @@ classdef NACA
         end
 
         %% --- Function to calculate the outer shape and camber line of a 4-digit NACA ---
-        function [x, yc, xu, yu, xl, yl] = naca_airfoil(obj, c, N)
+        function [x, yc, xu, yu, xl, yl, dycDx] = naca_airfoil(obj, c, N)
             if nargin < 3
                 N = obj.N;  % Default number of points
             end
@@ -28,7 +28,7 @@ classdef NACA
             x = linspace(0, 1, N)*c;
         
             % Get camber line and local slope
-            [yc, theta] = obj.naca_camber(x, c);
+            [yc, theta, dycDx] = obj.naca_camber(x, c);
         
             % Get thickness distribution
             yt = obj.naca_thickness(x);
@@ -48,7 +48,7 @@ classdef NACA
         %   theta: local slope angle = atan(dy/dx)
         %
         % x, m, p are dimensionless (0 <= xc <= 1).
-        function [yc, theta] = naca_camber(obj, x, c)
+        function [yc, theta, dycDx] = naca_camber(obj, x, c)
             % Preallocate
             yc    = zeros(size(x));
             dycDx = zeros(size(x));
