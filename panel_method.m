@@ -115,6 +115,12 @@ for i=1:n
      Cpr(i)=1.-Urt(i).^2; %Pressure coefficient with Kutta condition
 end
 
+% Verify Kutta condition
+assert(ismembertol(Urt(1), -Urt(end)), ...
+    "Tangential velocities at trailing edge are not equal")
+assert (ismembertol(Cpr(1), Cpr(end)), ...
+    "Pressure coefficients don't match at trailing edge")
+
 figure(2)
 plot(xp,Vt,'-bo','LineWidth',2,'MarkerSize',6);
 title('Velocity distribution without circulation');
