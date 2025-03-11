@@ -1,0 +1,6 @@
+# Compiled Matlab files
+*.asv
+*_logfile
+
+# Xfoil exports
+xfoil_exports/
