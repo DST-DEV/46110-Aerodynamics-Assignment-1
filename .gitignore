@@ -2,5 +2,6 @@
 *.asv
 *_logfile
 
-# Xfoil exports
+# Export files
 xfoil_exports/*.txt
+plots/

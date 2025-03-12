@@ -11,8 +11,8 @@ airfoils = [ ...
 
 %% Run Calculations
 rerun_C_ld_calc = false;
-rerun_C_p_calc = true;
-rerun_dC_p_calc = true;
+rerun_C_p_calc = false;
+rerun_dC_p_calc = false;
 
 AoAs_c_ld = [-5, 15, .1];
 AoA_c_p = 10;

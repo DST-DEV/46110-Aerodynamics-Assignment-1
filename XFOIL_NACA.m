@@ -310,7 +310,7 @@ classdef XFOIL_NACA
             YB_U = YB(YB >= 0);
             YB_L = YB(YB < 0);
             
-            % Plot: Airfoil
+            % Plot Airfoil
             figure(1);
             cla; hold on; grid off;
             set(gcf,'Color','White');
@@ -324,7 +324,6 @@ classdef XFOIL_NACA
         
         %% --- Function to plot the lift coefficient of an airfoil over a range of AoAs---
         function plot_Cl (obj, alpha, C_l)
-            % Plot lift coefficient
             figure(2);
             cla; hold on; grid on;
             set(gcf,'Color','White');
@@ -344,6 +343,29 @@ classdef XFOIL_NACA
             
             ylim('auto');
             xticks(-10:2:15);
+        end
+
+        %% --- Function to plot the pressure coefficient of an airfoil over x ---
+        function plot_Cp (obj, x, C_p)
+            figure(3);
+            cla; hold on; grid on;
+            set(gcf,'Color','White');
+            set(gca,'FontSize',12);
+            
+            plot(alpha , C_p, 'bo-', 'LineWidth', 2, 'MarkerSize', 6);
+            
+            % Highlight x=0 and y=0 grid lines
+            gray_color = [0.2, 0.2, 0.2];
+            xline(0, 'Color', gray_color, 'LineWidth', 1.5); % Thick vertical line at x=0
+            yline(0, 'Color', gray_color, 'LineWidth', 1.5); % Thick horizontal line at y=0
+            
+            % Plot labels
+            xlabel('$x/c$', 'Interpreter', 'latex');
+            ylabel('$C_p$', 'Interpreter', 'latex');
+            set(gca, 'TickLabelInterpreter', 'latex');
+            
+            ylim('auto');
+            xticks(-1:1:.1);
         end
     end
 end
