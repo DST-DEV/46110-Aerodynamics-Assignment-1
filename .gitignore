@@ -3,4 +3,4 @@
 *_logfile
 
 # Xfoil exports
-xfoil_exports/
+xfoil_exports/*.txt
