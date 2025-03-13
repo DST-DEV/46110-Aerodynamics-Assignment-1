@@ -4,19 +4,12 @@ clear
 clc
 close all
 
-% Plot parameters
-colors_array = ['k','k','k','k']; % Different colors for each airfoil
-lines_array = [":","-.","--","-"]; % Different markers for each airfoil
-names_array = ["NACA 2312","NACA 2324","NACA 4412","NACA 4424"]; % Airfoil names
 
 %% DATA: NACA 2312 // NACA 2324 // NACA 4412 // NACA 4424
 
-num = 1; % Value to change the airfoil data
+num = [1 2 3 4]; % Value to change the airfoil data
 n_div = 50; % Number of divisions for the arrays
 check_aoa = 10; % Angle of attack at which we want to check the deltaCp
-
-% Function to get the airfoil data
-[m,p,t] = airfoil_selection(num);
 
 c = 1; % [-] Chord line of the airfoils
 c_t = pi; % [rad] Transformed chord line
@@ -30,20 +23,36 @@ aoa = deg2rad(aoa);
 
 %% THIN AIRFOIL THEORY
 
-% Calculating the transformed derivative of the camber line
-dycdx_t = camber_transformed_derivation(m,p,c_t,theta);
- 
-% Calculating the fourier components for Glauert's solution
-[A0, A1] = fourier_components(dycdx_t,aoa,theta);
+for i = 1:length(num) % We loop to calculate the values for the four different airfoils
 
-% Calculating the lift coefficient of the airfoil by Glauert's solution
-cl = lift_coefficient(A0, A1);
+    % Function to get the airfoil data
+    [m,p,t] = airfoil_selection(num(i));
+    
+    % Calculating the transformed derivative of the camber line
+    dycdx_t = camber_transformed_derivation(m,p,c_t,theta);
+     
+    % Calculating the fourier components for Glauert's solution
+    [A0, A1] = fourier_components(dycdx_t,aoa,theta);
+    
+    % Calculating the lift coefficient of the airfoil by Glauert's solution
+    cl(i,:) = lift_coefficient(A0, A1);
+    
+    % Finding the index of the angle of attack equivalent to 10 degrees
+    [~,ind_aoa] = min(abs(rad2deg(aoa)-check_aoa));
+    
+    % Calculating the variation in the pressure coefficient
+    deltaCp(i,:) = delta_pressure_coefficient(dycdx_t, aoa(ind_aoa), Qinf, theta);
+end
+    
+%% SAVING THE RESULTS
 
-% Finding the index of the angle of attack equivalent to 10 degrees
-[~,ind_aoa] = min(abs(rad2deg(aoa)-check_aoa));
+% Creating a struct to save the data of all four airfoils as one variable
 
-% Calculating the variation in the pressure coefficient
-deltaCp = delta_pressure_coefficient(dycdx_t, aoa(ind_aoa), Qinf, theta);
+thinAirfoilTheory = [struct('name', '2312', 'cl', cl(1,:), 'dCp',deltaCp(1,:));
+                     struct('name', '2324', 'cl', cl(2,:), 'dCp',deltaCp(2,:));
+                     struct('name', '4412', 'cl', cl(3,:), 'dCp',deltaCp(3,:));
+                     struct('name', '4424', 'cl', cl(4,:), 'dCp',deltaCp(4,:))];
+
 
 %% PLOTTING THE RESULTS
 
