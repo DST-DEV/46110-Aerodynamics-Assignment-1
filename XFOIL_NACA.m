@@ -26,7 +26,7 @@ classdef XFOIL_NACA
                 max_iter = 200;
             end
             if nargin < 5
-                numNodes = 500;
+                numNodes = 160;
             end
             if nargin < 4
                 AoAs = [-5, 15, .25];  % Angles of attack [deg]

@@ -10,13 +10,13 @@ airfoils = [ ...
     ];
 
 %% Run Calculations
-rerun_C_ld_calc = false;
-rerun_C_p_calc = false;
-rerun_dC_p_calc = false;
+rerun_C_ld_calc = true;
+rerun_C_p_calc = true;
+rerun_dC_p_calc = true;
 
 AoAs_c_ld = [-5, 15, .1];
 AoA_c_p = 10;
-numNodes_c_l = 500;
+numNodes_c_l = 160;
 numNodes_c_p = 200;
 max_iter = 400;
 use_cached_input = false;
@@ -29,7 +29,7 @@ end
 
 %% Calculate C_l & C_d
 if rerun_C_ld_calc
-    for i = 1:size(airfoils)[0]
+    for i = 1:size(airfoils)
         % Run calculation with free transition
         [alpha, C_l, C_d] = airfoils(i).xfoil.calc_c_ld(true, ...
             use_cached_input, AoAs_c_ld, numNodes_c_l, max_iter);
@@ -46,7 +46,7 @@ end
 
 %% Calculate C_p
 if rerun_C_p_calc
-    for i = 1:size(airfoils)[0]
+    for i = 1:size(airfoils)
         % Run calculation with free transition
         [x, y, C_p] = airfoils(i).xfoil.calc_c_p(true, use_cached_input, ...
             AoA_c_p, numNodes_c_p, max_iter);
@@ -63,7 +63,7 @@ end
 
 %% Calculate ΔC_p
 if rerun_C_p_calc
-    for i = 1:size(airfoils)[0]
+    for i = 1:size(airfoils(:,1))
         % Run calculation with free transition
         [xc, dC_p] = airfoils(i).xfoil.calc_dc_p (airfoils(i).C_p_free.x, ...
             airfoils(i).C_p_free.y, airfoils(i).C_p_free.C_p);
