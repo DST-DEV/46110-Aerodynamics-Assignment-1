@@ -1,6 +1,7 @@
 clc;clear;
 %% Load Data
 xfoil_res = load('xfoil_exports\XFOIL_results.mat').airfoils;
+thin_res = load('xfoil_exports\thinAirfoilTheory.mat').thinAirfoilTheory;
 airfoil_names = ["2312", "2324", "4412", "4424"];
 
 %% User input
@@ -32,6 +33,7 @@ end
 if plot_C_l
     for i = 1:length(airfoil_names)
         % Find index of airfoil in structs
+        i_thin = find(strcmp({thin_res.name}, airfoil_names(i)));
         i_xfoil = find(strcmp({xfoil_res.name}, airfoil_names(i)));
         
         % Create plot
@@ -42,7 +44,7 @@ if plot_C_l
             
         % Plot C_l curves 
         % Plot thin airfoil theory
-        plt_cl_thin = plot(0,0, ...
+        plt_cl_thin = plot(thin_res(i_thin).aoa,thin_res(i_thin).cl, ...
                            LineWidth=lw(1), Marker=markers(1), MarkerSize=ms(1));
     
         % Plot panel method
@@ -111,6 +113,7 @@ fig_count = 4;
 if plot_dC_p
     for i = 1:length(airfoil_names)
         % Find index of airfoil in structs
+        i_thin = find(strcmp({thin_res.name}, airfoil_names(i)));
         i_xfoil = find(strcmp({xfoil_res.name}, airfoil_names(i)));
         
         % Create plot
@@ -121,7 +124,7 @@ if plot_dC_p
         
         % Plot ΔC_p curves 
         % Plot thin airfoil theory
-        plt_dcp_thin = plot(0,0, ...
+        plt_dcp_thin = plot(thin_res(i_thin).xc,thin_res(i_thin).dCp, ...
                            LineWidth=lw(1), Marker=markers(1), MarkerSize=ms(1));
     
         % Plot panel method

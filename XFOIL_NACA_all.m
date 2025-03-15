@@ -14,7 +14,7 @@ rerun_C_ld_calc = true;
 rerun_C_p_calc = true;
 rerun_dC_p_calc = true;
 
-AoAs_c_ld = [-5, 15, .1];
+AoAs_c_ld = [-10, 15, .1];
 AoA_c_p = 10;
 numNodes_c_l = 160;
 numNodes_c_p = 200;

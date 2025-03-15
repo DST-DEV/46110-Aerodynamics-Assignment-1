@@ -16,10 +16,10 @@ c_t = pi; % [rad] Transformed chord line
 density = 1.225; % [kg/m3] Air density
 Qinf = 1; % [m/s] Free stream velocity
 
-x = linspace(0,c,n_div); % Array to calculate the camber line
+x = linspace(0,1,n_div); % Array to calculate the camber line
 theta = acos(1 - 2.*x./c);
-aoa = linspace(-10,15,n_div);
-aoa = deg2rad(aoa);
+aoa_deg = linspace(-10,15,n_div);
+aoa = deg2rad(aoa_deg);
 
 %% THIN AIRFOIL THEORY
 
@@ -48,10 +48,10 @@ end
 
 % Creating a struct to save the data of all four airfoils as one variable
 
-thinAirfoilTheory = [struct('name', '2312', 'cl', cl(1,:), 'dCp',deltaCp(1,:));
-                     struct('name', '2324', 'cl', cl(2,:), 'dCp',deltaCp(2,:));
-                     struct('name', '4412', 'cl', cl(3,:), 'dCp',deltaCp(3,:));
-                     struct('name', '4424', 'cl', cl(4,:), 'dCp',deltaCp(4,:))];
+thinAirfoilTheory = [struct('name', '2312', 'xc', x, 'aoa', aoa_deg, 'cl', cl(1,:), 'dCp',deltaCp(1,:));
+                     struct('name', '2324', 'xc', x, 'aoa', aoa_deg, 'cl', cl(2,:), 'dCp',deltaCp(2,:));
+                     struct('name', '4412', 'xc', x, 'aoa', aoa_deg, 'cl', cl(3,:), 'dCp',deltaCp(3,:));
+                     struct('name', '4424', 'xc', x, 'aoa', aoa_deg, 'cl', cl(4,:), 'dCp',deltaCp(4,:))];
 
 
 %% PLOTTING THE RESULTS
