@@ -32,6 +32,7 @@ grid on
 xlabel('Angle of Attack [deg]')
 ylabel('Lift Coefficient [-]')
 legend('NACA 2312', 'NACA 2324', 'NACA 4412', 'NACA 4424', 'Location', 'best')
+title('Lift Coefficient vs Angle of Attack (Panel Method)')
 
 %% PANEL METHOD CALCULATION FOR ΔCp PLOT
 % Use fixed angle of attack for pressure distribution
@@ -55,6 +56,74 @@ xlabel('x/c')
 ylabel('\Delta C_p')
 title(['Pressure Difference Distribution \Delta C_p at ', num2str(fixed_aoa_deg), '° (Panel Method)'])
 legend('NACA 2312', 'NACA 2324', 'NACA 4412', 'NACA 4424', 'Location', 'best')
+
+%% PANEL METHOD CALCULATION FOR Cp DISTRIBUTION PLOT (TASK 3)
+% Plot the dimensionless pressure distribution Cp vs x/c for all airfoils
+fixed_aoa_deg = 10;
+fixed_aoa = deg2rad(fixed_aoa_deg);
+
+% Use figure with subplots for better clarity
+figure(3)
+
+% Define colors and markers for different airfoils
+colors = {'b', 'r', 'g', 'm'};
+airfoil_names = {'NACA 2312', 'NACA 2324', 'NACA 4412', 'NACA 4424'};
+
+% Plot each airfoil in a separate subplot
+for i = 1:length(num)
+    subplot(2, 2, i)
+    
+    % Get airfoil parameters and geometry
+    [m, p, t] = airfoil_selection(num(i));
+    [x, y] = naca_airfoil(m, p, t, c, n);
+    [~, xp, Cp] = panel_method(x, y, fixed_aoa);
+    
+    % Find leading edge index (minimum x value)
+    [~, le_idx] = min(x);
+    
+    % Determine upper and lower surface panels
+    n_panels = length(xp) - 1;
+    
+    % First half of points typically corresponds to upper surface when generated
+    % using the NACA airfoil function (from TE to LE)
+    upper_idx = 1:floor(n_panels/2);
+    lower_idx = (floor(n_panels/2)+1):n_panels;
+    
+    % Extract x-coordinates and Cp values for upper and lower surfaces
+    x_upper = xp(upper_idx);
+    Cp_upper = Cp(upper_idx);
+    
+    x_lower = xp(lower_idx);
+    Cp_lower = Cp(lower_idx);
+    
+    % Sort by x-coordinate
+    [x_upper, sort_idx] = sort(x_upper);
+    Cp_upper = Cp_upper(sort_idx);
+    
+    [x_lower, sort_idx] = sort(x_lower);
+    Cp_lower = Cp_lower(sort_idx);
+    
+    % Plot upper and lower surfaces
+    hold on
+    plot(x_upper/c, Cp_upper, [colors{i}, '-'], 'LineWidth', 2, 'DisplayName', 'Upper Surface');
+    plot(x_lower/c, Cp_lower, [colors{i}, '--'], 'LineWidth', 2, 'DisplayName', 'Lower Surface');
+    hold off
+    
+    % Set plot properties
+    grid on
+    xlabel('x/c')
+    ylabel('C_p')
+    % Removed: set(gca, 'YDir', 'reverse')
+    title([airfoil_names{i}, ' at ', num2str(fixed_aoa_deg), '°'])
+    legend('Location', 'best')
+    
+    % Adjust axis limits for better visibility
+    xlim([0 1])
+    ylim([-3 1.5])
+end
+
+% Add overall title
+sgtitle(['Pressure Distribution (C_p) at ', num2str(fixed_aoa_deg), '° (Panel Method)'])
 
 %% FUNCTIONS
 
@@ -243,9 +312,6 @@ function [xc, Delta_Cp] = compute_delta_cp(xp, x, y, Cp)
     Cp_lower_interp = interp1(x_lower, Cp_lower, xc, 'linear', 'extrap');
     
     % Calculate ΔCp = Cp_lower - Cp_upper, as the denominator reduces to 1/2
-    Delta_Cp = 2*(Cp_lower_interp - Cp_upper_interp);
+    Delta_Cp = (Cp_lower_interp - Cp_upper_interp);
 end
-
-
-
 
