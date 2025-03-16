@@ -21,7 +21,7 @@ ms = [8, 8, 4.5, 6.5];  % Marker size for the plots of the four methods
 lw = [1.2, 1.2, 1, 1];  % Linewidth for the lines of the four methods
 ax_col = [0.2, 0.2, 0.2];  % Color of accented axes
 ax_lw = 1.5;  % Line width of accented axes
-fs = 12;  % Plot font size
+fs = 16;  % Plot font size
 fig_count = 0;
 
 %% Preparation
@@ -88,7 +88,7 @@ if plot_C_l
         set(ax,'FontSize',fs);
         legend([plt_cl_thin, plt_cl_panel, plt_cl_free, plt_cl_fixed], ...
             {'Thin airfoil theory', 'Panel method', 'XFOIL (free transition)', ...
-            'XFOIL (fixed transition)'}, 'Location', 'northwest')
+            'XFOIL (fixed transition)'}, 'Location', 'northwest', 'Interpreter', 'latex')
         xlabel('AoA $[^{\circ}]$', 'Interpreter', 'latex');
         ylabel('$C_l$', 'Interpreter', 'latex');
         set(ax, 'TickLabelInterpreter', 'latex');
@@ -169,7 +169,7 @@ if plot_dC_p
         set(ax,'FontSize',fs);
         legend([plt_dcp_thin, plt_dcp_panel, plt_dcp_free, plt_dcp_fixed], ...
             {'Thin airfoil theory', 'Panel method', 'XFOIL (free transition)', ...
-            'XFOIL (fixed transition)'}, 'Location', 'northeast')
+            'XFOIL (fixed transition)'}, 'Location', 'northeast', 'Interpreter', 'latex')
         xlabel('$x/c$', 'Interpreter', 'latex');
         ylabel('$\Delta C_p$', 'Interpreter', 'latex');
         set(ax, 'TickLabelInterpreter', 'latex');
@@ -257,7 +257,7 @@ if plot_C_p
         set(ax,'FontSize',fs);
         legend([plt_cp_panel, plt_cp_free, plt_cp_fixed], ...
             {'Panel method', 'XFOIL (free transition)', ...
-            'XFOIL (fixed transition)'}, 'Location', 'southeast')
+            'XFOIL (fixed transition)'}, 'Location', 'southeast', 'Interpreter', 'latex')
         xlabel('$x/c$', 'Interpreter', 'latex');
         ylabel('$C_p$', 'Interpreter', 'latex');
         set(ax, 'TickLabelInterpreter', 'latex');
@@ -309,7 +309,8 @@ if plot_polars
         set(gcf,'Color','White');
         set(ax,'FontSize',fs);
         legend([plt_pol_free, plt_pol_fixed], ...
-            {'Free transition', 'Fixed transition'}, 'Location', 'southeast')
+            {'Free transition', 'Fixed transition'}, ...
+            'Location', 'southeast', 'Interpreter', 'latex')
         xlabel('$C_d$', 'Interpreter', 'latex');
         ylabel('$C_l$', 'Interpreter', 'latex');
         set(ax, 'TickLabelInterpreter', 'latex');
@@ -364,7 +365,8 @@ if plot_C_ld
         set(gcf,'Color','White');
         set(ax,'FontSize',fs);
         legend([plt_cld_free, plt_cld_fixed], ...
-            {'Free transition', 'Fixed transition'}, 'Location', 'northwest')
+            {'Free transition', 'Fixed transition'}, ...
+            'Location', 'southeast', 'Interpreter', 'latex')
         xlabel('AoA $[^{\circ}]$', 'Interpreter', 'latex');
         ylabel('$C_l/C_d$', 'Interpreter', 'latex');
         set(ax, 'TickLabelInterpreter', 'latex');
