@@ -10,6 +10,7 @@ plot_C_l = true;
 plot_dC_p = true;
 plot_C_p = true;
 plot_polars = true;
+plot_C_ld = true;
 
 exp_fld = 'plots';
 
@@ -17,7 +18,7 @@ exp_fld = 'plots';
 cols = ["#0072BD", "#D95319", "#EDB120", "#77AC30"];  % Colors of the lines
 markers = ["none", "+", "o", "diamond"];  % Markers for the four methods
 ms = [8, 8, 4.5, 6.5];  % Marker size for the plots of the four methods
-lw = [1, 1, 1, 1];  % Linewidth for the lines of the four methods
+lw = [1.2, 1.2, 1, 1];  % Linewidth for the lines of the four methods
 ax_col = [0.2, 0.2, 0.2];  % Color of accented axes
 ax_lw = 1.5;  % Line width of accented axes
 fs = 12;  % Plot font size
@@ -70,8 +71,8 @@ if plot_C_l
         plt_cl_free = plot(xfoil_res(i_xfoil).C_ld_free.alpha, ...
                            xfoil_res(i_xfoil).C_ld_free.C_l, ...
                            LineWidth=lw(3), Marker=markers(3), MarkerSize=ms(3));
-         plt_cl_fixed = plot(xfoil_res(i_xfoil).C_ld_fixed .alpha, ...
-                           xfoil_res(i_xfoil).C_ld_fixed .C_l, ...
+         plt_cl_fixed = plot(xfoil_res(i_xfoil).C_ld_fixed.alpha, ...
+                           xfoil_res(i_xfoil).C_ld_fixed.C_l, ...
                            LineWidth=lw(4), Marker=markers(4), MarkerSize=ms(4));
         
         % Highlight x=0 and y=0 grid lines
@@ -88,12 +89,13 @@ if plot_C_l
         legend([plt_cl_thin, plt_cl_panel, plt_cl_free, plt_cl_fixed], ...
             {'Thin airfoil theory', 'Panel method', 'XFOIL (free transition)', ...
             'XFOIL (fixed transition)'}, 'Location', 'northwest')
-        xlabel('AoA [deg]', 'Interpreter', 'latex');
+        xlabel('AoA $[^{\circ}]$', 'Interpreter', 'latex');
         ylabel('$C_l$', 'Interpreter', 'latex');
         set(ax, 'TickLabelInterpreter', 'latex');
         
         ylim('auto');
-        xticks(-10:2:15);
+        xticks(-10:2:16);
+        xlim(ax, [-10, 16]);
     
         % Save figure
         if savefigs
@@ -326,3 +328,61 @@ else
     disp('C_l vs C_d not plotted')
 end
 fig_count = 16;
+
+%% Plot C_l vs alpha
+if plot_C_ld
+    for i = 1:length(airfoil_names)
+        % Find index of airfoil in structs
+        i_xfoil = find(strcmp({xfoil_res.name}, airfoil_names(i)));
+        
+        % Create plot
+        figure(i+fig_count);
+        cla; hold on; grid on;
+        colororder(cols(3:end));
+        ax = gca;
+
+        % Plot Xfoil results (without interpolation)
+        C_ld_free = xfoil_res(i_xfoil).C_ld_free.C_l ./ xfoil_res(i_xfoil).C_ld_free.C_d;
+        C_ld_fixed = xfoil_res(i_xfoil).C_ld_fixed.C_l ./ xfoil_res(i_xfoil).C_ld_fixed.C_d;
+
+        plt_cld_free = plot(xfoil_res(i_xfoil).C_ld_free.alpha, ...
+                           C_ld_free, ...
+                           LineWidth=lw(3), Marker=markers(3), MarkerSize=ms(3));
+        plt_cld_fixed = plot(xfoil_res(i_xfoil).C_ld_fixed.alpha, ...
+                           C_ld_fixed, ...
+                           LineWidth=lw(4), Marker=markers(4), MarkerSize=ms(4));
+        
+        % Highlight x=0 and y=0 grid lines
+        x_ax = xline(0, Color=ax_col, LineWidth=ax_lw); % Thick vertical line at x=0
+        y_ax = yline(0, Color=ax_col, LineWidth=ax_lw); % Thick horizontal line at y=0
+    
+        %Order the plots 
+        ax.Children = [plt_cld_free; plt_cld_fixed; x_ax; y_ax];
+        hold off; 
+    
+        % Plot labels
+        set(gcf,'Color','White');
+        set(ax,'FontSize',fs);
+        legend([plt_cld_free, plt_cld_fixed], ...
+            {'Free transition', 'Fixed transition'}, 'Location', 'northwest')
+        xlabel('AoA $[^{\circ}]$', 'Interpreter', 'latex');
+        ylabel('$C_l/C_d$', 'Interpreter', 'latex');
+        set(ax, 'TickLabelInterpreter', 'latex');
+        
+        ylim('auto');
+        xticks(-10:2:16);
+        xlim(ax, [-10, 16]);
+    
+        % Save figure
+        if savefigs
+            exp_name = fullfile(exp_fld, ...
+                        sprintf('C_ld_vs_alpha_%s.pdf', airfoil_names(i)));
+            exportgraphics(gcf, exp_name, 'ContentType', 'vector', ...
+                'BackgroundColor', 'none', 'Resolution', 300);
+        end
+    end
+else
+    disp('C_ld vs alpha not plotted')
+end
+
+fig_count = 20;

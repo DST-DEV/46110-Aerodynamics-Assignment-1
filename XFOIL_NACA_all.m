@@ -10,9 +10,10 @@ airfoils = [ ...
     ];
 
 %% Run Calculations
-rerun_C_ld_calc = true;
-rerun_C_p_calc = true;
-rerun_dC_p_calc = true;
+rerun_C_ld_calc = false;
+rerun_C_p_calc = false;
+rerun_dC_p_calc = false;
+rerun_C_ld_max = true;
 
 AoAs_c_ld = [-10, 15, .1];
 AoA_c_p = 10;
@@ -77,5 +78,25 @@ if rerun_C_p_calc
         airfoils(i).C_p_fixed.dC_p = dC_p;
     end
 
+    save(fpath_res, 'airfoils');  % Save results
+end
+
+%% Get max C_l / C_d
+
+if rerun_C_ld_max
+    for i = 1:size(airfoils(:,1))
+        C_ld_free = airfoils(i).C_ld_free.C_l ./ airfoils(i).C_ld_free.C_d;
+        [C_ld_free_max, i_free_max] = max(C_ld_free);
+        airfoils(i).Max_eff_free = ...
+            struct('alpha', airfoils(i).C_ld_free.alpha(i_free_max), ...
+                   'C_ld', C_ld_free_max);
+        
+        C_ld_fixed = airfoils(i).C_ld_fixed.C_l ./ airfoils(i).C_ld_fixed.C_d;
+        [C_ld_fixed_max, i_fixed_max] = max(C_ld_fixed);
+        airfoils(i).Max_eff_fixed = ...
+            struct('alpha', airfoils(i).C_ld_fixed.alpha(i_fixed_max), ...
+                   'C_ld', C_ld_fixed_max);
+    end
+    
     save(fpath_res, 'airfoils');  % Save results
 end
