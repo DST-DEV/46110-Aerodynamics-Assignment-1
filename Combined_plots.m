@@ -2,17 +2,18 @@ clc;clear;
 %% Load Data
 xfoil_res = load('xfoil_exports\XFOIL_results.mat').airfoils;
 thin_res = load('xfoil_exports\thinAirfoilTheory.mat').thinAirfoilTheory;
+panel_res = load('xfoil_exports\PanelMethod.mat').PanelMethod;
 airfoil_names = ["2312", "2324", "4412", "4424"];
 
 %% User input
-savefigs = true;
-plot_C_l = false;
-plot_dC_p = false;
-plot_C_p = false;
+savefigs = false;
+plot_C_l = true;
+plot_dC_p = true;
+plot_C_p = true;
 plot_polars = false;
 plot_C_ld = false;
 plot_C_d = false;
-plot_x_t = true;
+plot_x_t = false;
 
 exp_fld = 'plots';
 
@@ -38,6 +39,7 @@ if plot_C_l
         % Find index of airfoil in structs
         i_thin = find(strcmp({thin_res.name}, airfoil_names(i)));
         i_xfoil = find(strcmp({xfoil_res.name}, airfoil_names(i)));
+        i_panel = find(strcmp({panel_res.name}, airfoil_names(i)));
         
         % Create plot
         figure(i+fig_count);
@@ -51,7 +53,7 @@ if plot_C_l
                            LineWidth=lw(1), Marker=markers(1), MarkerSize=ms(1));
     
         % Plot panel method
-        plt_cl_panel = plot(0,0, ...
+        plt_cl_panel = plot(panel_res(i_thin).alpha,panel_res(i_thin).cl, ...
                             LineWidth=lw(2), Marker=markers(2), MarkerSize=ms(2));
     
         % % Plot Xfoil results (Interpolate bc alpha step is way to fine)
@@ -119,6 +121,8 @@ if plot_dC_p
         % Find index of airfoil in structs
         i_thin = find(strcmp({thin_res.name}, airfoil_names(i)));
         i_xfoil = find(strcmp({xfoil_res.name}, airfoil_names(i)));
+        i_panel = find(strcmp({panel_res.name}, airfoil_names(i)));
+
         
         % Create plot
         figure(i+fig_count);
@@ -132,7 +136,7 @@ if plot_dC_p
                            LineWidth=lw(1), Marker=markers(1), MarkerSize=ms(1));
     
         % Plot panel method
-        plt_dcp_panel = plot(0,0, ...
+        plt_dcp_panel = plot(panel_res(i_thin).dCp(:,1),panel_res(i_thin).dCp(:,2), ...
                             LineWidth=lw(2), Marker=markers(2), MarkerSize=ms(2));
     
         % Plot Xfoil results (with interpolation to reduce number of points)
@@ -198,6 +202,7 @@ if plot_C_p
     for i = 1:length(airfoil_names)
         % Find index of airfoil in structs
         i_xfoil = find(strcmp({xfoil_res.name}, airfoil_names(i)));
+        i_panel = find(strcmp({panel_res.name}, airfoil_names(i)));
         
         % Create plot
         figure(i+fig_count);
@@ -207,7 +212,7 @@ if plot_C_p
         
         % Plot C_p curves 
         % Plot panel method
-        plt_cp_panel = plot(0,0, ...
+        plt_cp_panel = plot(panel_res(i_thin).Cp(:,1),panel_res(i_thin).Cp(:,2), ...
                             LineWidth=lw(2), Marker=markers(2), MarkerSize=ms(2));
     
         % Plot Xfoil results (with interpolation to reduce number of points)
