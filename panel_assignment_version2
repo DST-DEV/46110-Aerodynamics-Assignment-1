@@ -254,26 +254,50 @@ end
 function [xc, Delta_Cp] = compute_delta_cp(xp, x, y, Cp)
     % Compute ΔCp (Cp_lower - Cp_upper)
     
-    % Determine number of panels on upper and lower surfaces
-    n_panels = length(xp);
+    % Find the trailing edge and leading edge index
+    [~, te_idx] = max(x);
+    [~, le_idx] = min(x);
     
-    % For NACA airfoils with panel method, the first half points typically
-    % correspond to the upper surface (from trailing edge to leading edge)
-    n_upper = floor(n_panels/2);
-    n_lower = n_panels - n_upper;
+    % Determine which points are on upper and lower surface based on y values
+    % For each x-coordinate, the point with larger y is on upper surface
+    upper_points = zeros(1, length(xp));
+    lower_points = zeros(1, length(xp));
+    upper_count = 0;
+    lower_count = 0;
     
-    % Extract upper and lower surface points
-    upper_idx = 1:n_upper;
-    lower_idx = (n_upper+1):n_panels;
+    for i = 1:length(xp)
+        % Check if this point is closer to upper or lower surface
+        if xp(i) < 0.5  % Front half of airfoil
+            if y(i) > 0  % Above x-axis
+                upper_count = upper_count + 1;
+                upper_points(upper_count) = i;
+            else  % Below x-axis
+                lower_count = lower_count + 1;
+                lower_points(lower_count) = i;
+            end
+        else  % Back half of airfoil
+            if y(i) >= 0  % Above or on x-axis
+                upper_count = upper_count + 1;
+                upper_points(upper_count) = i;
+            else  % Below x-axis
+                lower_count = lower_count + 1;
+                lower_points(lower_count) = i;
+            end
+        end
+    end
     
-    % Get coordinates and pressure coefficients
-    x_upper = xp(upper_idx);
-    Cp_upper = Cp(upper_idx);
+    % Clean up arrays
+    upper_points = upper_points(1:upper_count);
+    lower_points = lower_points(1:lower_count);
     
-    x_lower = xp(lower_idx);
-    Cp_lower = Cp(lower_idx);
+    % Get coordinates and pressure coefficients for upper and lower surfaces
+    x_upper = xp(upper_points);
+    Cp_upper = Cp(upper_points);
     
-    % Sort by x-coordinate for proper interpolation
+    x_lower = xp(lower_points);
+    Cp_lower = Cp(lower_points);
+    
+    % Sort data points by x-coordinate
     [x_upper, idx_upper] = sort(x_upper);
     Cp_upper = Cp_upper(idx_upper);
     
@@ -281,12 +305,13 @@ function [xc, Delta_Cp] = compute_delta_cp(xp, x, y, Cp)
     Cp_lower = Cp_lower(idx_lower);
     
     % Create common x-coordinates for interpolation
-    xc = linspace(0, 1, 100);
+    xc = linspace(min(min(x_upper), min(x_lower)), max(max(x_upper), max(x_lower)), 100);
     
     % Interpolate pressure coefficients to common x-coordinates
     Cp_upper_interp = interp1(x_upper, Cp_upper, xc, 'linear', 'extrap');
     Cp_lower_interp = interp1(x_lower, Cp_lower, xc, 'linear', 'extrap');
     
-    % Calculate ΔCp = Cp_lower - Cp_upper
-    Delta_Cp = Cp_lower_interp - Cp_upper_interp;
+    % Calculate ΔCp = Cp_lower - Cp_upper, as the denominator reduces to 1/2
+    Delta_Cp = (Cp_lower_interp - Cp_upper_interp);
 end
+
