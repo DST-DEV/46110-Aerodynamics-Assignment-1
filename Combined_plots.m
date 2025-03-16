@@ -6,11 +6,13 @@ airfoil_names = ["2312", "2324", "4412", "4424"];
 
 %% User input
 savefigs = true;
-plot_C_l = true;
-plot_dC_p = true;
-plot_C_p = true;
-plot_polars = true;
-plot_C_ld = true;
+plot_C_l = false;
+plot_dC_p = false;
+plot_C_p = false;
+plot_polars = false;
+plot_C_ld = false;
+plot_C_d = false;
+plot_x_t = true;
 
 exp_fld = 'plots';
 
@@ -388,3 +390,155 @@ else
 end
 
 fig_count = 20;
+
+%% Plot C_d vs alpha
+if plot_C_d
+    for i = 1:length(airfoil_names)
+        % Find index of airfoil in structs
+        i_thin = find(strcmp({thin_res.name}, airfoil_names(i)));
+        i_xfoil = find(strcmp({xfoil_res.name}, airfoil_names(i)));
+        
+        % Create plot
+        figure(i+fig_count);
+        cla; hold on; grid on;
+        colororder(cols(3:end));
+        ax = gca;
+            
+        % Plot C_l curves 
+        % Plot Xfoil results (without interpolation)
+        plt_cd_free = plot(xfoil_res(i_xfoil).C_ld_free.alpha, ...
+                           xfoil_res(i_xfoil).C_ld_free.C_d, ...
+                           LineWidth=lw(3), Marker=markers(3), MarkerSize=ms(3));
+         plt_cd_fixed = plot(xfoil_res(i_xfoil).C_ld_fixed.alpha, ...
+                           xfoil_res(i_xfoil).C_ld_fixed.C_d, ...
+                           LineWidth=lw(4), Marker=markers(4), MarkerSize=ms(4));
+        
+        % Highlight x=0 and y=0 grid lines
+        x_ax = xline(0, Color=ax_col, LineWidth=ax_lw); % Thick vertical line at x=0
+        y_ax = yline(0, Color=ax_col, LineWidth=ax_lw); % Thick horizontal line at y=0
+    
+        %Order the plots 
+        ax.Children = [plt_cd_free; plt_cd_fixed; x_ax; y_ax];
+        hold off; 
+    
+        % Plot labels
+        set(gcf,'Color','White');
+        set(ax,'FontSize',fs);
+        legend([plt_cd_free, plt_cd_fixed], ...
+            {'Free transition', 'Fixed transition'}, ...
+            'Location', 'northwest', 'Interpreter', 'latex')
+        xlabel('AoA $[^{\circ}]$', 'Interpreter', 'latex');
+        ylabel('$C_d$', 'Interpreter', 'latex');
+        set(ax, 'TickLabelInterpreter', 'latex');
+        
+        ylim('auto');
+        xticks(-10:2:16);
+        xlim(ax, [-10, 16]);
+    
+        % Save figure
+        if savefigs
+            exp_name = fullfile(exp_fld, ...
+                        sprintf('C_d_vs_alpha_%s.pdf', airfoil_names(i)));
+            exportgraphics(gcf, exp_name, 'ContentType', 'vector', ...
+                'BackgroundColor', 'none', 'Resolution', 300);
+        end
+    end
+else
+    disp('C_l vs alpha not plotted')
+end
+
+fig_count = 24;
+
+%% Plot transition point x_t vs alpha
+if plot_x_t
+    cols = ["#0072BD", "#D95319", "#EDB120", "#77AC30"];  % Colors of the lines
+    markers = ["o", "+", "diamond", "v"];  % Markers for the four methods
+    ms = [3.5, 6, 2.5, 4.5];  % Marker size for the plots of the four methods
+    lw = [1, 1, 1, 1];  % Linewidth for the lines of the four methods
+
+    for i = 1:length(airfoil_names)
+        % Find index of airfoil in structs
+        i_thin = find(strcmp({thin_res.name}, airfoil_names(i)));
+        i_xfoil = find(strcmp({xfoil_res.name}, airfoil_names(i)));
+        
+        % Create plot
+        figure(i+fig_count);
+        cla; hold on; grid on;
+        colororder(cols);
+        ax = gca;
+            
+        % Plot C_l curves 
+        % Plot Xfoil results (without interpolation)
+        plt_cd_free_top = plot(xfoil_res(i_xfoil).C_ld_free.alpha, ...
+                           xfoil_res(i_xfoil).C_ld_free.xt_top, ...
+                           LineWidth=lw(1), Marker=markers(1), MarkerSize=ms(1), ...
+                           DisplayName='');
+        plt_cd_free_bot = plot(xfoil_res(i_xfoil).C_ld_free.alpha, ...
+                           xfoil_res(i_xfoil).C_ld_free.xt_bot, ...
+                           LineWidth=lw(2), Marker=markers(2), MarkerSize=ms(2), ...
+                           DisplayName='');
+        plt_cd_fixed_top = plot(xfoil_res(i_xfoil).C_ld_fixed.alpha, ...
+                           xfoil_res(i_xfoil).C_ld_fixed.xt_top, ...
+                           LineWidth=lw(3), Marker=markers(3), MarkerSize=ms(3), ...
+                           DisplayName='');
+        plt_cd_fixed_bot = plot(xfoil_res(i_xfoil).C_ld_fixed.alpha, ...
+                           xfoil_res(i_xfoil).C_ld_fixed.xt_top, ...
+                           LineWidth=lw(4), Marker=markers(4), MarkerSize=ms(4), ...
+                           DisplayName='');
+        
+        % Highlight x=0 and y=0 grid lines
+        x_ax = xline(0, Color=ax_col, LineWidth=ax_lw); % Thick vertical line at x=0
+        y_ax = yline(0, Color=ax_col, LineWidth=ax_lw); % Thick horizontal line at y=0
+    
+        %Order the plots 
+        ax.Children = [plt_cd_free_top; plt_cd_free_bot; ...
+                       plt_cd_fixed_top; plt_cd_fixed_bot; x_ax; y_ax];
+        hold off; 
+    
+        % Plot labels
+        set(gcf,'Color','White');
+        set(ax,'FontSize',fs);
+        legend(ax,'off')
+        % legend([plt_cd_free_top, plt_cd_free_bot, plt_cd_fixed_top, plt_cd_fixed_bot], ...
+        %     {'Top - Free transition', 'Bottom - Free transition', ...
+        %     'Top - Fixed transition', 'Bottom - Fixed transition'}, ...
+        %     'Location', 'northwest', 'Interpreter', 'latex', ...
+        %     'Orientation', 'horizontal')
+        xlabel('AoA $[^{\circ}]$', 'Interpreter', 'latex');
+        ylabel('$x_t/c$', 'Interpreter', 'latex');
+        set(ax, 'TickLabelInterpreter', 'latex');
+        
+        ylim('auto');
+        xticks(-10:2:16);
+        xlim(ax, [-10, 16]);
+    
+        % Save figure
+        if savefigs
+            exp_name = fullfile(exp_fld, ...
+                        sprintf('xt_vs_alpha_%s.pdf', airfoil_names(i)));
+            exportgraphics(gcf, exp_name, 'ContentType', 'vector', ...
+                'BackgroundColor', 'none', 'Resolution', 300);
+        end
+    end
+
+    % Create a separate figure for the legend
+    legendFig = figure(fig_count+5);
+    ax = axes(legendFig);
+    
+    % Hide the axes and display only the legend
+    axis(ax, 'off');
+    legend(ax, [plt_cd_free_top, plt_cd_free_bot, plt_cd_fixed_top, plt_cd_fixed_bot], ...
+            {'Top - Free transition', 'Bottom - Free transition', ...
+            'Top - Fixed transition', 'Bottom - Fixed transition'}, ...
+            'Location', 'northwest', 'Interpreter', 'latex', ...
+            'Orientation', 'horizontal', 'NumColumns', 2)
+
+    % Save figure
+    if savefigs
+        exp_name = fullfile(exp_fld, 'xt_vs_alpha_legend.pdf');
+        exportgraphics(legendFig, exp_name, 'ContentType', 'vector', ...
+            'BackgroundColor', 'none', 'Resolution', 300);
+    end
+end
+
+fig_count = 29;

@@ -20,7 +20,7 @@ classdef XFOIL_NACA
         end
         
         %% --- Function to calculate C_l and C_d of 4-digit NACA for a range of angles of attack---
-        function [alpha, C_l, C_d] = calc_c_ld (obj, free_BL, use_cached_input, ...
+        function [alpha, C_l, C_d, xt_top, xt_bot] = calc_c_ld (obj, free_BL, use_cached_input, ...
                 AoAs, numNodes, max_iter)
             if nargin < 6
                 max_iter = 200;
@@ -114,12 +114,12 @@ classdef XFOIL_NACA
                 %[status,result] = system(cmd);
                 system(cmd)
 
-                [alpha, C_l, C_d] = obj.read_C_ld (free_BL);
+                [alpha, C_l, C_d, xt_top, xt_bot] = obj.read_C_ld (free_BL);
             end
         end
 
         %% --- Function to calculate C_p of 4-digit NACA---
-        function [x, y, C_p] = calc_c_p (obj, free_BL, use_cached_input, ...
+        function [x, y, C_p, x_trans] = calc_c_p (obj, free_BL, use_cached_input, ...
                 AoA, numNodes, max_iter)
             if nargin < 6
                 max_iter = 200;
@@ -142,6 +142,7 @@ classdef XFOIL_NACA
             if free_BL
                 fname_input = ['input_NACA' obj.NACA '_Cp_free_BL.txt'];  % XFoil input filename
                 fname_res = ['Cp_NACA' obj.NACA '_free_BL.txt'];  % Lift coefficient filename
+                fname_trans = ['trans_NACA' obj.NACA '_free_BL.txt'];  % Transition point filename
             else
                 fname_input = ['input_NACA' obj.NACA '_Cp_fixed_BL.txt'];  % Airfoil coordinates filename
                 fname_res = ['Cp_NACA' obj.NACA '_fixed_BL.txt'];  % Lift coefficient filename
@@ -160,6 +161,11 @@ classdef XFOIL_NACA
             end
             if (exist(fullfile(exp_fld, fname_res),'file'))
                 delete(fullfile(exp_fld, fname_res));
+            end
+            if free_BL
+                if (exist(fullfile(exp_fld, fname_trans),'file'))
+                delete(fullfile(exp_fld, fname_trans));
+            end
             end
 
             if use_cached_input
@@ -198,7 +204,13 @@ classdef XFOIL_NACA
 
                 % Save output to txt file
                 fprintf(fid, ['CPWR ' exp_fld '\\' fname_res '\n']);
-                fprintf(fid, '\n');
+                if free_BL
+                    fprintf(fid, 'vplo\n');  % Enter BL plot menu
+                    fprintf(fid, 'N\n');  % Enter BL plot menue
+                    fprintf(fid, ['dump ' exp_fld '\\' fname_trans '\n']);  % Save transition data
+                    fprintf(fid,'\n');
+                end
+                fprintf(fid,'\n');
                 
                 %Finish up
                 fprintf(fid, '\nQUIT\n');
@@ -211,7 +223,7 @@ classdef XFOIL_NACA
                 %[status,result] = system(cmd);
                 system(cmd)
 
-                [x, y, C_p] = obj.read_C_p (free_BL);
+                [x, y, C_p, x_trans] = obj.read_C_p (free_BL);
             end
         end
 
@@ -257,7 +269,7 @@ classdef XFOIL_NACA
         end
 
         %% --- Function to load the AoAs, C_l and C_d values of a 4-digit NACA from a text file from Xfoil---
-        function [alpha, C_l, C_d] = read_C_ld (obj, free_BL)
+        function [alpha, C_l, C_d, xt_top, xt_bot] = read_C_ld (obj, free_BL)
             % Determine filename
             if free_BL
                 fpath_res = ['xfoil_exports\Cl_NACA' obj.NACA '_free_BL.txt'];
@@ -277,10 +289,12 @@ classdef XFOIL_NACA
             alpha  = dataBuffer{1,1}(:,1); 
             C_l  = dataBuffer{1,1}(:,2); 
             C_d = dataBuffer{1,1}(:,3);
+            xt_top = dataBuffer{1,1}(:,6);
+            xt_bot = dataBuffer{1,1}(:,7);
         end
 
-        %% --- Function to load the AoAs, C_l and C_d values of a 4-digit NACA from a text file from Xfoil---
-        function [x, y, C_p] = read_C_p (obj, free_BL)
+        %% --- Function to load the x, y, and C_p values of a 4-digit NACA from a text file from Xfoil---
+        function [x, y, C_p, x_trans] = read_C_p (obj, free_BL)
             % Determine filename
             if free_BL
                 fpath_res = ['xfoil_exports\Cp_NACA' obj.NACA '_free_BL.txt'];
@@ -295,11 +309,28 @@ classdef XFOIL_NACA
                                         'CollectOutput',1,...
                                         'Delimiter','');
             fclose(res_file);
-            
+
             % Separate Cp data
             x  = dataBuffer{1,1}(:,1); 
             y  = dataBuffer{1,1}(:,2); 
             C_p = dataBuffer{1,1}(:,3);
+
+            % Find transition point for free transition
+            if free_BL
+                res_BL_file = fopen(['xfoil_exports\trans_NACA' obj.NACA '_free_BL.txt']);
+                dataBuffer = textscan(res_BL_file,'%f %f', ...
+                                        'HeaderLines',7,...
+                                        'CollectOutput',1,...
+                                        'Delimiter','');
+                fclose(res_BL_file);
+
+                %Find transition point
+                i_zero = find(dataBuffer{1,1}(:,2) == 0,2, 'first'); % find the first two points where nc is zero
+                i_trans = i_zero(2)-1; % Index of the transition point on the upper surface
+                x_trans = dataBuffer{1,1}(i_trans,1);
+            else
+                x_trans = .1;
+            end    
         end
         
         %% --- Function to plot the shape of an airfoil---
