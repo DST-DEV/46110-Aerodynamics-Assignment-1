@@ -10,10 +10,10 @@ airfoils = [ ...
     ];
 
 %% Run Calculations
-rerun_C_ld_calc = false;
+rerun_C_ld_calc = true;
 rerun_C_p_calc = false;
 rerun_dC_p_calc = false;
-rerun_C_ld_max = true;
+rerun_C_ld_max = false;
 
 AoAs_c_ld = [-10, 15, .1];
 AoA_c_p = 10;
@@ -32,14 +32,16 @@ end
 if rerun_C_ld_calc
     for i = 1:size(airfoils)
         % Run calculation with free transition
-        [alpha, C_l, C_d] = airfoils(i).xfoil.calc_c_ld(true, ...
+        [alpha, C_l, C_d, xt_top, xt_bot] = airfoils(i).xfoil.calc_c_ld(true, ...
             use_cached_input, AoAs_c_ld, numNodes_c_l, max_iter);
-        airfoils(i).C_ld_free = struct('alpha', alpha, 'C_l', C_l, 'C_d', C_d);
+        airfoils(i).C_ld_free = struct('alpha', alpha, 'C_l', C_l, ...
+            'C_d', C_d, 'xt_top', xt_top, 'xt_bot', xt_bot);
 
         % Run calculation with fixed transition
-        [alpha, C_l, C_d] = airfoils(i).xfoil.calc_c_ld(false, ...
+        [alpha, C_l, C_d, xt_top, xt_bot] = airfoils(i).xfoil.calc_c_ld(false, ...
             use_cached_input, AoAs_c_ld, numNodes_c_l, max_iter);
-        airfoils(i).C_ld_fixed = struct('alpha', alpha, 'C_l', C_l, 'C_d', C_d);
+        airfoils(i).C_ld_fixed = struct('alpha', alpha, 'C_l', C_l, ...
+            'C_d', C_d, 'xt_top', xt_top, 'xt_bot', xt_bot);
     end
 
     save(fpath_res, 'airfoils');  % Save results
@@ -49,14 +51,14 @@ end
 if rerun_C_p_calc
     for i = 1:size(airfoils)
         % Run calculation with free transition
-        [x, y, C_p] = airfoils(i).xfoil.calc_c_p(true, use_cached_input, ...
+        [x, y, C_p, x_trans] = airfoils(i).xfoil.calc_c_p(true, use_cached_input, ...
             AoA_c_p, numNodes_c_p, max_iter);
-        airfoils(i).C_p_free = struct('x', x, 'y', y, 'C_p', C_p);
+        airfoils(i).C_p_free = struct('x', x, 'y', y, 'C_p', C_p, 'x_trans', x_trans);
 
         % Run calculation with fixed transition
-        [x, y, C_p] = airfoils(i).xfoil.calc_c_p(false, use_cached_input, ...
+        [x, y, C_p, x_trans] = airfoils(i).xfoil.calc_c_p(false, use_cached_input, ...
             AoA_c_p, numNodes_c_p, max_iter);
-        airfoils(i).C_p_fixed = struct('x', x, 'y', y, 'C_p', C_p);
+        airfoils(i).C_p_fixed = struct('x', x, 'y', y, 'C_p', C_p, 'x_trans', x_trans);
     end
 
     save(fpath_res, 'airfoils');  % Save results
