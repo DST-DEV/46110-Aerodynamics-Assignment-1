@@ -119,7 +119,7 @@ for i = 1:length(num)
     
     % Adjust axis limits for better visibility
     xlim([0 1])
-    ylim([-3 1.5])
+    ylim([-5 1.5])
 end
 
 % Add overall title
@@ -173,8 +173,15 @@ end
 
 function [cl, xp, Cp] = panel_method(x, y, aoa)
     % Computes lift coefficient and pressure coefficient using the panel method
+    % with proper trailing edge closure and Kutta condition verification
     
     n = length(x) - 1;
+    
+    % Close the airfoil shape - ensure trailing edge is properly closed
+    y(1) = 0;
+    y(end) = 0;
+    x(end) = 1; % Setting to chord length (assuming c=1)
+    x(1) = 1;
     
     % Calculate panel properties
     for j = 1:n
@@ -226,28 +233,45 @@ function [cl, xp, Cp] = panel_method(x, y, aoa)
     
     % Solve for vortex strengths
     M = A \ F';
-
-    % Calculate tangential velocities
+    
+    % Calculate tangential velocities without circulation
+    Vt1 = zeros(1, n);
     for i = 1:n
-        Vt(i) = sum(B(i, :) .* M') + Tx(i) * cos(aoa) + Ty(i) * sin(aoa);
+        Vt1(i) = sum(B(i, :) .* M');
+        Vt(i) = Vt1(i) + Tx(i) * cos(aoa) + Ty(i) * sin(aoa);
+    end
+
+    % Calculate vortex distribution (parabolic)
+    sum_vort = 0.0;
+    for i = 1:n
+        sum_vort = sum_vort + (i-1) * (n-i) * plength(i);
+    end
+    
+    for i = 1:n
+        vort(i) = (i-1) * (n-i) / sum_vort; % parabolic vortex distribution
     end
 
     % Calculate circulation for Kutta condition
-    sumVort = sum((0:n-1) .* (n-1:-1:0) .* plength);
-    vort = ((0:n-1) .* (n-1:-1:0)) / sumVort;
-
     C = A \ B;
     D = B * C;
     Vrt = (A + D) * vort';
-    Gamma = -(Vt(1) + Vt(end) + dot([cos(aoa), sin(aoa)], ([Tx(1), Ty(1)] + [Tx(end), Ty(end)]))) / (Vrt(1) + Vrt(end));
+    
+    Gamma = -(Vt1(1) + Vt1(end) + dot([cos(aoa), sin(aoa)], ([Tx(1), Ty(1)] + [Tx(end), Ty(end)]))) / (Vrt(1) + Vrt(end));
 
     % Calculate lift coefficient using Kutta-Joukowski theorem
     cl = 2 * Gamma / (max(x) - min(x));
 
     % Calculate pressure coefficient
-    for i = 1:n
-        Urt(i) = Gamma * Vrt(i) + Vt(i);  % Tangential velocity including circulation
-        Cp(i) = 1 - Urt(i)^2;             % Pressure coefficient
+    Urt = Gamma * Vrt' + Vt;  % Tangential velocity including circulation
+    Cp = 1 - Urt.^2;          % Pressure coefficient
+    
+    % Verify Kutta condition (optional but recommended)
+    if ~ismembertol(Urt(1), -Urt(end), 1e-2)
+        warning('Tangential velocities at trailing edge are not equal: %.4f vs %.4f', Urt(1), -Urt(end));
+    end
+    
+    if ~ismembertol(Cp(1), Cp(end), 1e-2)
+        warning('Pressure coefficients don''t match at trailing edge: %.4f vs %.4f', Cp(1), Cp(end));
     end
 end
 
@@ -314,4 +338,3 @@ function [xc, Delta_Cp] = compute_delta_cp(xp, x, y, Cp)
     % Calculate ΔCp = Cp_lower - Cp_upper, as the denominator reduces to 1/2
     Delta_Cp = (Cp_lower_interp - Cp_upper_interp);
 end
-
