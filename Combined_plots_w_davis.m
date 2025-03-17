@@ -9,7 +9,7 @@ airfoil_names = ["2312", "2324", "4412", "4424"];
 %% User input
 savefigs = true;
 plot_C_l = true;
-plot_dC_p = false;
+plot_dC_p = true;
 plot_C_p = true;
 plot_polars = false;
 plot_C_ld = false;
@@ -142,6 +142,9 @@ if plot_dC_p
         % Plot panel method
         plt_dcp_panel = plot(panel_res(i_thin).dCp(:,1),panel_res(i_thin).dCp(:,2), ...
                             LineWidth=lw(2), Marker=markers(2), MarkerSize=ms(2));
+        plt_dcp_panel_davis = plot(panel_res_davis(i_panel_davis).panel_res.xc, ...
+                                  panel_res_davis(i_panel_davis).panel_res.dC_p, ...
+                            LineWidth=lw(5), Marker=markers(5), MarkerSize=ms(5));
     
         % Plot Xfoil results (with interpolation to reduce number of points)
         % xc_plot = linspace(0,1,30);
@@ -171,14 +174,14 @@ if plot_dC_p
         y_ax = yline(0, Color=ax_col, LineWidth=ax_lw); % Thick horizontal line at y=0
     
         %Order the plots 
-        ax.Children = [plt_dcp_thin; plt_dcp_panel; plt_dcp_free; plt_dcp_fixed; x_ax; y_ax];
+        ax.Children = [plt_dcp_thin; plt_dcp_panel; plt_dcp_panel_davis; plt_dcp_free; plt_dcp_fixed; x_ax; y_ax];
         hold off; 
     
         % Plot labels
         set(gcf,'Color','White');
         set(ax,'FontSize',fs);
-        legend([plt_dcp_thin, plt_dcp_panel, plt_dcp_free, plt_dcp_fixed], ...
-            {'Thin airfoil theory', 'Panel method', 'XFOIL (free transition)', ...
+        legend([plt_dcp_thin, plt_dcp_panel, plt_dcp_panel_davis, plt_dcp_free, plt_dcp_fixed], ...
+            {'Thin airfoil theory', 'Panel method', 'Panel method Davis', 'XFOIL (free transition)', ...
             'XFOIL (fixed transition)'}, 'Location', 'northeast', 'Interpreter', 'latex')
         xlabel('$x/c$', 'Interpreter', 'latex');
         ylabel('$\Delta C_p$', 'Interpreter', 'latex');

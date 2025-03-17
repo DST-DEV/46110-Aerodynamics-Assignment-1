@@ -18,8 +18,10 @@ fpath_res = 'xfoil_exports\panel_results_davis.mat';
 for i = 1:size(airfoils)
     % Run calculation with free transition
     [alpha, C_l, C_p, x, y] = calc_panel(airfoils(i).NACA, AoAs, N_panels);
+    [xc, dC_p] = calc_dc_p (x, y, C_p(201,:));
+
     airfoils(i).panel_res = struct('alpha', alpha, 'C_l', C_l, ...
-        'C_p', C_p, 'x', x, 'y', y);
+        'C_p', C_p, 'x', x, 'y', y, 'dC_p', dC_p, 'xc', xc);
 
 end
 
@@ -132,4 +134,28 @@ function [alpha, C_l, C_p, xp, yp] = calc_panel (NACA, alpha, N_panels)
         assert (ismembertol(C_p(i_a, 1), C_p(i_a, end)), ...
             "Pressure coefficients don't match at trailing edge")
     end
+end
+
+%% --- Function to calculate ΔC_p of 4-digit NACA---
+function [xc, dC_p] = calc_dc_p (x, y, C_p)
+    % Split upper and lower surfaces
+    upper_idx = y >= 0;
+    lower_idx = y < 0;
+
+    % Sort upper and lower surfaces by x-coordinates
+    [x_upper, sort_idx_upper] = sort(x(upper_idx));
+    C_p_upper = C_p(upper_idx);
+    C_p_upper = C_p_upper(sort_idx_upper);
+    
+    [x_lower, sort_idx_lower] = sort(x(lower_idx));
+    C_p_lower = C_p(lower_idx);
+    C_p_lower = C_p_lower(sort_idx_lower);
+    
+    % Ensure x-coordinates match for interpolation
+    C_p_lower_interp = interp1(x_lower, C_p_lower, x_upper, ...
+        'linear', 'extrap');
+    
+    % Compute relative pressure coefficient (ΔCp)
+    dC_p = C_p_lower_interp - C_p_upper;
+    xc = x_upper;
 end
