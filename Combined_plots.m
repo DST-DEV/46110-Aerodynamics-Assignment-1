@@ -3,17 +3,18 @@ clc;clear;
 xfoil_res = load('xfoil_exports\XFOIL_results.mat').airfoils;
 thin_res = load('xfoil_exports\thinAirfoilTheory.mat').thinAirfoilTheory;
 panel_res = load('xfoil_exports\PanelMethod.mat').PanelMethod;
+panel_res_davis = load('xfoil_exports\panel_results_davis.mat').airfoils;
 airfoil_names = ["2312", "2324", "4412", "4424"];
 
 %% User input
-savefigs = false;
+savefigs = true;
 plot_C_l = true;
 plot_dC_p = true;
 plot_C_p = true;
-plot_polars = false;
-plot_C_ld = false;
-plot_C_d = false;
-plot_x_t = false;
+plot_polars = true;
+plot_C_ld = true;
+plot_C_d = true;
+plot_x_t = true;
 
 exp_fld = 'plots';
 
@@ -337,7 +338,7 @@ else
 end
 fig_count = 16;
 
-%% Plot C_l vs alpha
+%% Plot C_l/C_d vs alpha
 if plot_C_ld
     for i = 1:length(airfoil_names)
         % Find index of airfoil in structs
@@ -378,7 +379,7 @@ if plot_C_ld
         ylabel('$C_l/C_d$', 'Interpreter', 'latex');
         set(ax, 'TickLabelInterpreter', 'latex');
         
-        ylim('auto');
+        ylim(ax, [-75, 150]);
         xticks(-10:2:16);
         xlim(ax, [-10, 16]);
     
@@ -436,7 +437,7 @@ if plot_C_d
         ylabel('$C_d$', 'Interpreter', 'latex');
         set(ax, 'TickLabelInterpreter', 'latex');
         
-        ylim('auto');
+        ylim(ax, [0, 0.055]);
         xticks(-10:2:16);
         xlim(ax, [-10, 16]);
     
