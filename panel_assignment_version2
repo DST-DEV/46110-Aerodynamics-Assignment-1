@@ -7,7 +7,7 @@ close all
 %% DATA: NACA 2312 // NACA 2324 // NACA 4412 // NACA 4424
 
 num = [1 2 3 4]; % Airfoil selection numbers
-n = 50; % Number of panels
+n = 150; % Number of panels
 c = 1; % Chord length [m]
 aoa_deg = linspace(-10,15,n); % Angle of attack range [deg]
 aoa = deg2rad(aoa_deg); % Convert to radians
